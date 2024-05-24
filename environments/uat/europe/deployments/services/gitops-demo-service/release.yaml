@@ -1,0 +1,52 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: gitops-common
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: ./deployment/common
+  force: true
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops-source
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: gitops-demo-backend
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: gitops-source
+    - name: environment-configmap
+    - name: environment-secret
+    - name: tempo
+    - name: prometheus
+    - name: loki
+  interval: 5m
+  path: ./deployment/backend
+  force: true
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops-source
+
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: gitops-demo-frontend
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: gitops-demo-backend
+  interval: 5m
+  path: ./deployment/frontend
+  force: true
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: gitops-source
